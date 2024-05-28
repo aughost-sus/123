@@ -8,6 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Typography } from '@mui/material';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 interface RowData {
     name: string;
@@ -54,6 +55,26 @@ const columns = [
 ];
 
 const BodyTable: React.FC = () => {
+  
+  const magic = async () => {
+    let config: AxiosRequestConfig = {
+        method: 'get',
+        url: '/api',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    };
+
+    await axios(config).then((response: AxiosResponse) => {
+        console.log(response.data)
+    }).catch((error: AxiosError | any) => {
+        console.log(error)
+    })
+}
+
+useEffect(() => {
+   magic()
+}, [])
   const [dateTime, setDateTime] = useState(new Date());
 
   useEffect(() => {

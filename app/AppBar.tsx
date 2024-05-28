@@ -1,8 +1,11 @@
 import { AppBar, Toolbar } from "@mui/material";
 import Image from "next/image";
 import LogoImage from "./img/psslailogo.png";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 const Navbar = () => {
+
+    
     return (
         <AppBar position="static" elevation={9}>
             <Toolbar disableGutters style={{ backgroundColor: '#f8f9fa', padding: '10px'}}>
