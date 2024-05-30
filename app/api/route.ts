@@ -59,5 +59,5 @@ export async function GET() {
     
       const Neww = customAxiosInstance(getInfo)
 
-      return new Response((await Neww).data)
+      return new Response(JSON.stringify((await Neww).status))
   }
