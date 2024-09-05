@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, SetStateAction } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -9,96 +8,118 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Typography } from '@mui/material';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import Chip from '@mui/material/Chip';
+import CheckIcon from '@mui/icons-material/Check';
+import WarningAmber from '@mui/icons-material/WarningAmber';
 
 interface RowData {
-    name: string;
-    status: number | null;
-    name1: string | null;
-    status1: number | null;
-  }
-  
-  function createData(name: string, status: number | null, name1: string | null, status1: number | null): RowData {
-    return { name, status, name1, status1 };
-  }
-  
-//table data and labels
-
-const rows = [
-  createData('Core Bank', null, 'In-House Critical Apps', null),
-  createData('PFS Coral', 200, 'PSSLAI Tools - Risk Profiling', 200),
-  createData('PFS Bluelace', 262, 'PSSLAI Tools - Watchlist', 24),
-  createData('PFS Luminous', 200, 'ID Print', 67),
-  createData('Outsourced Apps', null, 'Omnichannel', 49),
-  createData('eBT (ERP)', 200, 'BilisOnline(Admin)', 24),
-  createData('AMLA', 237, 'GL Tools', 37),
-  createData('Altitude', 262, 'OMIU(Reports)', 24),
-  createData('EPFS Apps', null, 'ITRACK (SMS LogS Viewer)', 67),
-  createData('ITRACK - 0919 160 2154', 356, 'In-House Admin Apps', null),
-  createData('ITRACK - 0919 160 8000', 200, 'PSSLAI Tools - User Access Management', 24),
-  createData('BilisOnline (Web Portal)', 237, 'PSSLAI Tools - API Maintenance', 37),
-  createData('BilisMobile (iOS)', 262, 'M365 Apps', null),
-  createData('BilisMobile (Android)', 305, 'RMT', 67),
-  createData('ML Online Query/Disbursing', 356, 'SaaS', null),
-  createData('LBC Online Query/Disbursing', 356, 'myHR', 49),
-  createData('External Apps', null, 'IBM Instana', 24),
-  createData('PNP SDLIS', 237, 'Soprano (A2P messaging)', 37),
-  createData('PNP PDLIS', 262, 'Infobip (A2P messaging)', 24),
-  createData('BFP SDLIS', 305, 'In-House Non-Critical Apps', null),
-  createData('BFP PDLIS', 305, 'PSSLAI Tools - CSR', 67),
-  createData('Web Portals', null, 'PSSLAI Tools - Incident Report(HR)', 67),
-  createData('PSSLAI Website',200, 'PSSLAI Tools - Courier', 67),
-  createData('OMIU (Member)', 305, null, null),
-];
-const columns = [
-  { label: 'Business Systems/Applications', labelstatus: 'Overall Status' },
-  { label: 'Business Systems/Applications', labelstatus: 'Overall Status' }, 
-];
-
-const BodyTable: React.FC = () => {
-  
-  const magic = async () => {
-    let config: AxiosRequestConfig = {
-        method: 'get',
-        url: '/api',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    };
-
-    await axios(config).then((response: AxiosResponse) => {
-        console.log(response.data)
-    }).catch((error: AxiosError | any) => {
-        console.log(error)
-    })
+  name: string;
+  path: string | null;
+  name1: string | null;
+  status1: number | null;
 }
 
-useEffect(() => {
-   magic()
-}, [])
-  const [dateTime, setDateTime] = useState(new Date());
+function createData(name: string, path: string | null, name1: string | null, status1: number | null): RowData {
+  return { name,path, name1, status1 };
+}
 
-  useEffect(() => {
+const columns = [
+  { label: 'Business Systems/Applications', labelstatus: 'Overall Status' },
+  { label: 'Business Systems/Applications', labelstatus: 'Overall Status' },
+];
+
+const SuccessiConLabels = <Chip color="success" label="Up and Running" icon={<CheckIcon />} />;
+const ErroriConLabels = <Chip color="error" label="Down" icon={<WarningAmber />} />;
+//Icons And Labels
+
+const BodyTable: React.FC = () => {
+  // const [status, setStatus] = useState<any>(null); 
+ 
+  const magic = async (path:any) => { 
+
+    let config: AxiosRequestConfig = {                                                                
+      method: 'get',
+      url: `/api/${path}`,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    };
+
+    try {
+      const response: AxiosResponse = await axios(config); // Use try-catch instead of .then().catch()
+      if (response.status === 200) {
+        return (SuccessiConLabels);
+      }
+    } catch (error:any) {
+      return (ErroriConLabels);
+    }
+  }
+ 
+  const rows = [
+    createData('Core Bank', 'psslai', 'In-House Critical Apps', null ),
+    createData('AFK', 'afpslai', 'In-House Critical Apps', null ),
+  ];
+
+  // useEffect(() => {
+  //   magic('psslai');
+  //   console.log();
+  // }, []);
+
+  const [dateTime, setDateTime] = useState<SetStateAction<Date> | undefined>();
+  const [tablerow, setTableRow] = useState<Array<[]> | undefined>();
+  const clock = () => {
     const interval = setInterval(() => {
       setDateTime(new Date());
     }, 1000);
-
     return () => clearInterval(interval);
+  }
+
+  let rowsz: any = []
+  
+  useEffect(() => {
+    clock();
   }, []);
 
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June', 'July',
-    'August', 'September', 'October', 'November', 'December'
-  ];
+  const status = async () => {
 
-  const monthName = months[dateTime.getMonth()];
+    let b: any = []
+    rows.map( async (x: any) => {
+      const c = await magic(x.path)
+      const d = { 
+        name: x.name,
+        path: x.path,
+        name1: x.name1,
+        status1: c
+      }
+      b.push(d)
+    })
+     rowsz = b
+     setTableRow(b);
+     console.log(rowsz)
+    return b;
+  }
+
+  useEffect(() => {
+    status();
+  }, []);
+
 
   return (
     <TableContainer component={Paper} style={{ marginTop: '0px', maxWidth: '100%', border: '2px solid #dee2e6', backgroundColor: '#F1F1F1' }}>
-      <Typography variant="h5" style={{textAlign: "center"}}>
+      <Typography variant="h5" style={{ textAlign: "center" }}>
         Business Systems/Applications Availability and Performance Monitoring - PROD Environment
       </Typography>
-      <Typography variant="h6" style={{textAlign: "center"}}>
-        Date and Time: {`${dateTime.getDate()} ${monthName} ${dateTime.getFullYear()} ${dateTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' })}`}
+      <Typography variant="h6" style={{ textAlign: "center" }}>
+        Date and Time: {dateTime?.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: "numeric",
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: true,
+                timeZone: 'Asia/Manila',
+            })}
       </Typography>
 
       <Table sx={{ minWidth: 650, borderCollapse: 'collapse' }} aria-label="simple table">
@@ -113,7 +134,7 @@ useEffect(() => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, rowIndex) => (
+          {tablerow?.map((row: any, rowIndex: any) => (
             <TableRow key={rowIndex}>
               <TableCell
                 component="th"
@@ -130,7 +151,7 @@ useEffect(() => {
               >
                 {row.name}
               </TableCell>
-              <TableCell align="right" style={{ border: '2px solid #dee2e6' }}>{row.status}</TableCell>
+              <TableCell align="center" style={{ border: '2px solid #dee2e6' }}>{row.status1}</TableCell>
               <TableCell align="left"
                 style={{
                   border: '2px solid #dee2e6',
